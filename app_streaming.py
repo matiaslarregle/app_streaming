@@ -14,14 +14,19 @@ def cargar_y_entrenar_modelo():
     print("Contenido actual:", os.listdir())
     print("Contenido de 'data':", os.listdir('data'))
 
-    # Cargar CSVs
-    df_a = pd.read_csv('data/Olga_comentarios.csv')
-    df_b = pd.read_csv('data/Vorterix_comentarios.csv')
-    df_c = pd.read_csv('data/carajo_comentarios.csv')
-    df_d = pd.read_csv('data/AZZ_comentarios.csv')
-    df_e = pd.read_csv('data/Blender_comentarios.csv')
-    df_f = pd.read_csv('data/Gelatina_comentarios.csv')
-    df_g = pd.read_csv('data/Luzu_comentarios.csv')
+    # Función para cargar un CSV desde la carpeta 'data' con ruta absoluta segura
+def cargar_csv(nombre_archivo):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta = os.path.join(base_dir, 'data', nombre_archivo)
+    return pd.read_csv(ruta)
+
+df_a = cargar_csv('Olga_comentarios.csv')
+df_b = cargar_csv('Vorterix_comentarios.csv')
+df_c = cargar_csv('carajo_comentarios.csv')
+df_d = cargar_csv('AZZ_comentarios.csv')
+df_e = cargar_csv('Blender_comentarios.csv')
+df_f = cargar_csv('Gelatina_comentarios.csv')
+df_g = cargar_csv('Luzu_comentarios.csv')
 
     def expandir_comentarios(df):
         filas = []
