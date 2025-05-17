@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import re
@@ -7,6 +6,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
+
+# --- FUNCIONES AUXILIARES ---
 
 def limpiar_texto(texto):
     texto = str(texto).lower()
@@ -30,10 +31,6 @@ def expandir_comentarios(df):
 
 @st.cache_resource
 def cargar_y_entrenar_modelo():
-    print("Directorio actual:", os.getcwd())
-    print("Contenido actual:", os.listdir())
-    print("Contenido de 'data':", os.listdir('data'))
-
     df_a = cargar_csv('Olga_comentarios.csv')
     df_b = cargar_csv('Vorterix_comentarios.csv')
     df_c = cargar_csv('carajo_comentarios.csv')
@@ -73,13 +70,11 @@ def predecir_comentario(comentario, modelo, vectorizer, le):
     pred = modelo.predict(vector)
     return le.inverse_transform(pred)[0]
 
-# Función para obtener la ruta absoluta a un archivo dentro de la carpeta 'logos'
 def obtener_ruta_logo(nombre_archivo):
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    ruta_logo = os.path.join(base_dir, 'logos', nombre_archivo)
-    return ruta_logo
+    return os.path.join(base_dir, 'logos', nombre_archivo)
 
-# Diccionario con rutas completas
+# --- DICCIONARIO DE LOGOS ---
 logos_canales = {
     "olgaenvivo_": obtener_ruta_logo("olga.jpg"),
     "VorterixOficial": obtener_ruta_logo("vorterix.jpg"),
@@ -90,16 +85,16 @@ logos_canales = {
     "luzutv": obtener_ruta_logo("luzutv.png")
 }
 
-# Inicializar estado si no existe
+# --- INICIALIZACIÓN DE VARIABLES DE ESTADO ---
 if 'mostrar_resultado' not in st.session_state:
     st.session_state.mostrar_resultado = False
     st.session_state.prediccion = ""
 
-# Cargar modelo
+# --- CARGA DE MODELO ---
 modelo, vectorizer, le = cargar_y_entrenar_modelo()
 
-# ---- INTERFAZ ----
-if not st.session_state.mostrar_resultado:
+# --- INTERFAZ PRINCIPAL ---
+def interfaz_prediccion():
     st.markdown("<h1>Predicción de comentarios en canales de STREAMING</h1>", unsafe_allow_html=True)
     st.markdown("### Tipeá un comentario y descubrí a qué canal corresponde 🤓")
 
@@ -112,28 +107,33 @@ if not st.session_state.mostrar_resultado:
             canal = predecir_comentario(comentario_usuario, modelo, vectorizer, le)
             st.session_state.prediccion = canal
             st.session_state.mostrar_resultado = True
-            st.experimental_rerun()
 
-else:
+def interfaz_resultado():
     canal = st.session_state.prediccion
 
-    # Imagen centrada
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.image(logos_canales.get(canal, ""), use_container_width=True, caption=canal)
+        ruta_logo = logos_canales.get(canal)
+        if ruta_logo and os.path.exists(ruta_logo):
+            st.image(ruta_logo, use_container_width=True, caption=canal)
+        else:
+            st.warning("No se encontró logo para este canal.")
 
-    # Texto centrado y grande
     st.markdown(
         f"<h2 style='text-align: center; font-size: 32px;'>Este comentario fue escrito en un video de<br><b>{canal}</b></h2>",
         unsafe_allow_html=True
     )
 
-    # Botón volver
     if st.button("🔙 Volver"):
         st.session_state.mostrar_resultado = False
         st.session_state.prediccion = ""
-        st.experimental_rerun()
 
+# --- FLUJO PRINCIPAL ---
+if st.session_state.mostrar_resultado:
+    interfaz_resultado()
+else:
+    interfaz_prediccion()
 
+# --- PIE DE PÁGINA ---
 st.markdown("---")
 st.markdown("Creado por [matilarregle](https://x.com/elescouter)")
