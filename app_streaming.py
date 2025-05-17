@@ -10,6 +10,10 @@ from sklearn.model_selection import train_test_split
 
 @st.cache_resource
 def cargar_y_entrenar_modelo():
+    print("Directorio actual:", os.getcwd())
+    print("Contenido actual:", os.listdir())
+    print("Contenido de 'data':", os.listdir('data'))
+
     # Cargar CSVs
     df_a = pd.read_csv('data/Olga_comentarios.csv')
     df_b = pd.read_csv('data/Vorterix_comentarios.csv')
