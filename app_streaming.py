@@ -11,13 +11,13 @@ from sklearn.model_selection import train_test_split
 @st.cache_resource
 def cargar_y_entrenar_modelo():
     # Cargar CSVs
-    df_a = pd.read_csv('Olga_comentarios.csv')
-    df_b = pd.read_csv('Vorterix_comentarios.csv')
-    df_c = pd.read_csv('carajo_comentarios.csv')
-    df_d = pd.read_csv('AZZ_comentarios.csv')
-    df_e = pd.read_csv('Blender_comentarios.csv')
-    df_f = pd.read_csv('Gelatina_comentarios.csv')
-    df_g = pd.read_csv('Luzu_comentarios.csv')
+    df_a = pd.read_csv('data/Olga_comentarios.csv')
+    df_b = pd.read_csv('data/Vorterix_comentarios.csv')
+    df_c = pd.read_csv('data/carajo_comentarios.csv')
+    df_d = pd.read_csv('data/AZZ_comentarios.csv')
+    df_e = pd.read_csv('data/Blender_comentarios.csv')
+    df_f = pd.read_csv('data/Gelatina_comentarios.csv')
+    df_g = pd.read_csv('data/Luzu_comentarios.csv')
 
     def expandir_comentarios(df):
         filas = []
@@ -72,13 +72,13 @@ if 'mostrar_resultado' not in st.session_state:
 
 # Diccionario de imágenes
 logos_canales = {
-    "olgaenvivo_": "olga.jpg",
-    "VorterixOficial": "vorterix.jpg",
-    "CarajoStream": "carajo.png",
-    "somosazz": "azz.png",
-    "estoesblender": "blender.jpeg",
-    "SomosGelatina": "gelatina.jpg",
-    "luzutv": "luzutv.png"
+    "olgaenvivo_": "logos/olga.jpg",
+    "VorterixOficial": "logos/vorterix.jpg",
+    "CarajoStream": "logos/carajo.png",
+    "somosazz": "logos/azz.png",
+    "estoesblender": "logos/blender.jpeg",
+    "SomosGelatina": "logos/gelatina.jpg",
+    "luzutv": "logos/luzutv.png"
 }
 
 # Cargar modelo
