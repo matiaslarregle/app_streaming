@@ -79,15 +79,21 @@ if 'mostrar_resultado' not in st.session_state:
     st.session_state.mostrar_resultado = False
     st.session_state.prediccion = ""
 
-# Diccionario de imágenes
+# Función para obtener la ruta absoluta a un archivo dentro de la carpeta 'logos'
+def obtener_ruta_logo(nombre_archivo):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta_logo = os.path.join(base_dir, 'logos', nombre_archivo)
+    return ruta_logo
+
+# Diccionario con rutas completas
 logos_canales = {
-    "olgaenvivo_": "logos/olga.jpg",
-    "VorterixOficial": "logos/vorterix.jpg",
-    "CarajoStream": "logos/carajo.png",
-    "somosazz": "logos/azz.png",
-    "estoesblender": "logos/blender.jpeg",
-    "SomosGelatina": "logos/gelatina.jpg",
-    "luzutv": "logos/luzutv.png"
+    "olgaenvivo_": obtener_ruta_logo("olga.jpg"),
+    "VorterixOficial": obtener_ruta_logo("vorterix.jpg"),
+    "CarajoStream": obtener_ruta_logo("carajo.png"),
+    "somosazz": obtener_ruta_logo("azz.png"),
+    "estoesblender": obtener_ruta_logo("blender.jpeg"),
+    "SomosGelatina": obtener_ruta_logo("gelatina.jpg"),
+    "luzutv": obtener_ruta_logo("luzutv.png")
 }
 
 # Cargar modelo
