@@ -8,33 +8,39 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
 
+def limpiar_texto(texto):
+    texto = str(texto).lower()
+    texto = re.sub(r'<.*?>', ' ', texto)
+    texto = re.sub(r'[^a-záéíóúüñ0-9\s]', '', texto)
+    texto = re.sub(r'\s+', ' ', texto).strip()
+    return texto
+
+def cargar_csv(nombre_archivo):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta = os.path.join(base_dir, 'data', nombre_archivo)
+    return pd.read_csv(ruta)
+
+def expandir_comentarios(df):
+    filas = []
+    for _, row in df.iterrows():
+        comentarios = eval(row['Comentarios Detalles']) if isinstance(row['Comentarios Detalles'], str) else row['comentarios']
+        for comentario in comentarios:
+            filas.append({'comentario': comentario, 'Canal': row['Canal']})
+    return pd.DataFrame(filas)
+
 @st.cache_resource
 def cargar_y_entrenar_modelo():
     print("Directorio actual:", os.getcwd())
     print("Contenido actual:", os.listdir())
     print("Contenido de 'data':", os.listdir('data'))
 
-    # Función para cargar un CSV desde la carpeta 'data' con ruta absoluta segura
-def cargar_csv(nombre_archivo):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    ruta = os.path.join(base_dir, 'data', nombre_archivo)
-    return pd.read_csv(ruta)
-
-df_a = cargar_csv('Olga_comentarios.csv')
-df_b = cargar_csv('Vorterix_comentarios.csv')
-df_c = cargar_csv('carajo_comentarios.csv')
-df_d = cargar_csv('AZZ_comentarios.csv')
-df_e = cargar_csv('Blender_comentarios.csv')
-df_f = cargar_csv('Gelatina_comentarios.csv')
-df_g = cargar_csv('Luzu_comentarios.csv')
-
-    def expandir_comentarios(df):
-        filas = []
-        for _, row in df.iterrows():
-            comentarios = eval(row['Comentarios Detalles']) if isinstance(row['Comentarios Detalles'], str) else row['comentarios']
-            for comentario in comentarios:
-                filas.append({'comentario': comentario, 'Canal': row['Canal']})
-        return pd.DataFrame(filas)
+    df_a = cargar_csv('Olga_comentarios.csv')
+    df_b = cargar_csv('Vorterix_comentarios.csv')
+    df_c = cargar_csv('carajo_comentarios.csv')
+    df_d = cargar_csv('AZZ_comentarios.csv')
+    df_e = cargar_csv('Blender_comentarios.csv')
+    df_f = cargar_csv('Gelatina_comentarios.csv')
+    df_g = cargar_csv('Luzu_comentarios.csv')
 
     df_total = pd.concat([
         expandir_comentarios(df_a),
@@ -61,23 +67,11 @@ df_g = cargar_csv('Luzu_comentarios.csv')
 
     return modelo, vectorizer, le
 
-def limpiar_texto(texto):
-    texto = str(texto).lower()
-    texto = re.sub(r'<.*?>', ' ', texto)
-    texto = re.sub(r'[^a-záéíóúüñ0-9\s]', '', texto)
-    texto = re.sub(r'\s+', ' ', texto).strip()
-    return texto
-
 def predecir_comentario(comentario, modelo, vectorizer, le):
     comentario_limpio = limpiar_texto(comentario)
     vector = vectorizer.transform([comentario_limpio])
     pred = modelo.predict(vector)
     return le.inverse_transform(pred)[0]
-
-# Inicializar estado si no existe
-if 'mostrar_resultado' not in st.session_state:
-    st.session_state.mostrar_resultado = False
-    st.session_state.prediccion = ""
 
 # Función para obtener la ruta absoluta a un archivo dentro de la carpeta 'logos'
 def obtener_ruta_logo(nombre_archivo):
@@ -96,6 +90,11 @@ logos_canales = {
     "luzutv": obtener_ruta_logo("luzutv.png")
 }
 
+# Inicializar estado si no existe
+if 'mostrar_resultado' not in st.session_state:
+    st.session_state.mostrar_resultado = False
+    st.session_state.prediccion = ""
+
 # Cargar modelo
 modelo, vectorizer, le = cargar_y_entrenar_modelo()
 
@@ -113,8 +112,7 @@ if not st.session_state.mostrar_resultado:
             canal = predecir_comentario(comentario_usuario, modelo, vectorizer, le)
             st.session_state.prediccion = canal
             st.session_state.mostrar_resultado = True
-            st.rerun()
-
+            st.experimental_rerun()
 
 else:
     canal = st.session_state.prediccion
@@ -134,7 +132,7 @@ else:
     if st.button("🔙 Volver"):
         st.session_state.mostrar_resultado = False
         st.session_state.prediccion = ""
-        st.rerun()
+        st.experimental_rerun()
 
 
 st.markdown("---")
