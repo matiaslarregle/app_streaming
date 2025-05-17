@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
 
-# ---------------------- FUNCIONES AUXILIARES ----------------------
+# ------------------------ FUNCIONES AUXILIARES ------------------------
 
 def limpiar_texto(texto):
     texto = str(texto).lower()
@@ -29,21 +29,20 @@ def expandir_comentarios(df):
             filas.append({'comentario': comentario, 'Canal': row['Canal']})
     return pd.DataFrame(filas)
 
-def obtener_ruta_logo(nombre_archivo):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_dir, 'logos', nombre_archivo)
-
-# ---------------------- ENTRENAMIENTO DEL MODELO ----------------------
-
 @st.cache_resource
 def cargar_y_entrenar_modelo():
     archivos = [
-        'Olga_comentarios.csv', 'Vorterix_comentarios.csv', 'carajo_comentarios.csv',
-        'AZZ_comentarios.csv', 'Blender_comentarios.csv', 'Gelatina_comentarios.csv', 'Luzu_comentarios.csv'
+        'Olga_comentarios.csv',
+        'Vorterix_comentarios.csv',
+        'carajo_comentarios.csv',
+        'AZZ_comentarios.csv',
+        'Blender_comentarios.csv',
+        'Gelatina_comentarios.csv',
+        'Luzu_comentarios.csv'
     ]
+    df_list = [expandir_comentarios(cargar_csv(a)) for a in archivos]
+    df_total = pd.concat(df_list, ignore_index=True)
 
-    dfs = [expandir_comentarios(cargar_csv(nombre)) for nombre in archivos]
-    df_total = pd.concat(dfs, ignore_index=True)
     df_total['comentario_limpio'] = df_total['comentario'].apply(limpiar_texto)
 
     vectorizer = TfidfVectorizer(max_features=50000)
@@ -65,7 +64,9 @@ def predecir_comentario(comentario, modelo, vectorizer, le):
     pred = modelo.predict(vector)
     return le.inverse_transform(pred)[0]
 
-# ---------------------- LOGOS ----------------------
+def obtener_ruta_logo(nombre_archivo):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_dir, 'logos', nombre_archivo)
 
 logos_canales = {
     "olgaenvivo_": obtener_ruta_logo("olga.jpg"),
@@ -77,57 +78,29 @@ logos_canales = {
     "luzutv": obtener_ruta_logo("luzutv.png")
 }
 
-# ---------------------- ESTADO DE LA APP ----------------------
+# ------------------------ INTERFAZ STREAMLIT ------------------------
 
-if 'mostrar_resultado' not in st.session_state:
-    st.session_state.mostrar_resultado = False
-    st.session_state.prediccion = ""
+st.markdown("<h1>Predicción de comentarios en canales de STREAMING</h1>", unsafe_allow_html=True)
+st.markdown("### Tipeá un comentario y descubrí a qué canal corresponde 🤓")
+
+comentario_usuario = st.text_area("Acá va tu comentario: 👇", height=150)
 
 modelo, vectorizer, le = cargar_y_entrenar_modelo()
 
-# ---------------------- INTERFAZ STREAMLIT ----------------------
+if st.button("🔍 Predecir Canal"):
+    if comentario_usuario.strip() == "":
+        st.warning("⚠️ PRIMERO INGRESÁ UN COMENTARIO ⚠️")
+    else:
+        canal = predecir_comentario(comentario_usuario, modelo, vectorizer, le)
 
-st.set_page_config(page_title="Clasificador de Comentarios", layout="centered")
-st.markdown("<h1 style='text-align: center;'>Predicción de comentarios en canales de STREAMING</h1>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image(logos_canales.get(canal, ""), use_container_width=True, caption=canal)
 
-if not st.session_state.mostrar_resultado:
-    st.markdown("### Tipeá un comentario y descubrí a qué canal corresponde 🤓")
+        st.markdown(
+            f"<h2 style='text-align: center; font-size: 32px;'>Este comentario fue escrito en un video de<br><b>{canal}</b></h2>",
+            unsafe_allow_html=True
+        )
 
-    comentario_usuario = st.text_area("Acá va tu comentario: 👇", height=150)
-
-    if st.button("🔍 Predecir Canal"):
-        if comentario_usuario.strip() == "":
-            st.warning("⚠️ PRIMERO INGRESÁ UN COMENTARIO ⚠️")
-        else:
-            canal = predecir_comentario(comentario_usuario, modelo, vectorizer, le)
-            st.session_state.prediccion = canal
-            st.session_state.mostrar_resultado = True
-            st.experimental_rerun()
-
-else:
-    canal = st.session_state.prediccion
-
-    # Mostrar imagen centrada solo si existe
-    logo = logos_canales.get(canal)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if logo and os.path.exists(logo):
-            st.image(logo, use_container_width=True, caption=canal)
-        else:
-            st.warning(f"No se encontró el logo para el canal: {canal}")
-
-    # Texto del resultado
-    st.markdown(
-        f"<h2 style='text-align: center; font-size: 28px;'>Este comentario fue escrito en un video de<br><b>{canal}</b></h2>",
-        unsafe_allow_html=True
-    )
-
-    # Botón para volver
-    if st.button("🔙 Volver"):
-        st.session_state.mostrar_resultado = False
-        st.session_state.prediccion = ""
-        st.experimental_rerun()
-
-# Footer
 st.markdown("---")
 st.markdown("Creado por [matilarregle](https://x.com/elescouter)")
