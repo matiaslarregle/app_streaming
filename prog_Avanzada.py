@@ -27,8 +27,6 @@ class ClasificadorComentarios(ClasificadorBase):
         self._le = LabelEncoder()
         self._modelo = None
 
-    # ---------------------- Métodos privados (encapsulamiento) ------------------------
-
     def _limpiar_texto(self, texto):  # Método "privado"
         texto = str(texto).lower()
         texto = re.sub(r'<.*?>', ' ', texto)
@@ -114,8 +112,6 @@ logos_canales = {
     "SomosGelatina": obtener_ruta_logo("gelatina.jpg"),
     "luzutv": obtener_ruta_logo("luzutv.png")
 }
-
-# ---------------------- INTERFAZ STREAMLIT ------------------------
 
 st.markdown("<h1>Predicción de comentarios en canales de STREAMING</h1>", unsafe_allow_html=True)
 st.markdown("### Tipeá un comentario y descubrí a qué canal corresponde 🤓")
