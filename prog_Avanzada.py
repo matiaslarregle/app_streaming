@@ -3,7 +3,6 @@ import pandas as pd
 import re
 import os
 import numpy as np
-from abc import ABC, abstractmethod  # Abstracción
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
