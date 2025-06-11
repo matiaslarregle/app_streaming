@@ -124,14 +124,13 @@ if st.button("🔍 Predecir Canal"):
     else:
         canal = clasificador.predecir_comentario(comentario_usuario)
 
+        logo_path = logos_canales.get(canal, None)
+
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.image(logos_canales.get(canal, ""), use_container_width=True, caption=canal)
-
-        st.markdown(
-            f"<h2 style='text-align: center; font-size: 32px;'>Este comentario fue escrito en un video de<br><b>{canal}</b></h2>",
-            unsafe_allow_html=True
-        )
-
+            if logo_path:  # Solo mostrar si existe logo
+                st.image(logo_path, use_container_width=True, caption=canal)
+            else:
+                st.markdown(f"Sin logo para el canal: {canal}")
 st.markdown("---")
 st.markdown("Creado por [matilarregle](https://x.com/elescouter)")
