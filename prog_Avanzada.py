@@ -11,23 +11,21 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 
-class ClasificadorBase(ABC):
-    @abstractmethod
+class ClasificadorBase:
     def cargar_y_entrenar_modelo(self):
         pass
 
-    @abstractmethod
     def predecir_comentario(self, comentario):
         pass
 
 class ClasificadorComentarios(ClasificadorBase):
     def __init__(self, data_folder='data'):
-        self._data_folder = data_folder  # Encapsulado con "_"
+        self._data_folder = data_folder
         self._vectorizer = TfidfVectorizer(max_features=50000)
         self._le = LabelEncoder()
         self._modelo = None
 
-    def _limpiar_texto(self, texto):  # Método "privado"
+    def _limpiar_texto(self, texto):
         texto = str(texto).lower()
         texto = re.sub(r'<.*?>', ' ', texto)
         texto = re.sub(r'[^a-záéíóúüñ0-9\s]', '', texto)
@@ -86,13 +84,13 @@ class ClasificadorComentarios(ClasificadorBase):
         self._modelo.fit(X_train, y_train, epochs=5, batch_size=32, validation_split=0.1, verbose=0)
         return self._modelo, self._vectorizer, self._le
 
-    def predecir_comentario(self, comentario):  # Polimorfismo
+    def predecir_comentario(self, comentario):
         comentario_limpio = self._limpiar_texto(comentario)
         vector = self._vectorizer.transform([comentario_limpio]).toarray()
         pred = self._modelo.predict(vector, verbose=0)
         return self._le.inverse_transform([np.argmax(pred)])[0]
 
-class ClasificadorDummy(ClasificadorBase):  # Otro ejemplo de polimorfismo
+class ClasificadorDummy(ClasificadorBase):
     def cargar_y_entrenar_modelo(self):
         return None, None, None
 
